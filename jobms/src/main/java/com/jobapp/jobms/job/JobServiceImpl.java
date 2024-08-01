@@ -1,9 +1,15 @@
 package com.jobapp.jobms.job;
 
+import com.jobapp.jobms.job.dto.CompanyWithReviewsDTO;
+import com.jobapp.jobms.job.dto.JobWithCompanyDTO;
+import com.jobapp.jobms.job.external.Company;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class JobServiceImpl implements JobService{
@@ -18,8 +24,43 @@ public class JobServiceImpl implements JobService{
 //    private Long nextId = 1L;
 
     @Override
-    public List<Job> findAll() {
-        return jobRepository.findAll();
+    public List<JobWithCompanyDTO> findAll() {
+
+        List<Job> jobs = jobRepository.findAll();
+        List<JobWithCompanyDTO> jobWithCompanyDTOs = new ArrayList<>();
+
+        return jobs.stream().map(this::convertToDto).collect(Collectors.toList());
+
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        for (Job job : jobs){
+//            JobWithCompanyDTO jobWithCompanyDTO = new JobWithCompanyDTO();
+//            jobWithCompanyDTO.setJob(job);
+//
+//            Company company = restTemplate.getForObject(
+//                    "http://localhost:8081/companies/" + job.getCompanyId(),
+//                    Company.class);
+//
+//            jobWithCompanyDTO.setCompany(company);
+//            jobWithCompanyDTOs.add(jobWithCompanyDTO);
+//        }
+//        return jobWithCompanyDTOs;
+    }
+
+    private JobWithCompanyDTO convertToDto(Job job){
+
+        JobWithCompanyDTO jobWithCompanyDTO = new JobWithCompanyDTO();
+        jobWithCompanyDTO.setJob(job);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        CompanyWithReviewsDTO CompanyWithReviewsDTO = restTemplate.getForObject(
+                "http://localhost:8081/companies/" + job.getCompanyId(),
+                CompanyWithReviewsDTO.class);
+
+        jobWithCompanyDTO.setReviewList(CompanyWithReviewsDTO.getReviewList());
+        jobWithCompanyDTO.setCompany(CompanyWithReviewsDTO.getCompany());
+        return jobWithCompanyDTO;
     }
 
     @Override
@@ -30,13 +71,24 @@ public class JobServiceImpl implements JobService{
     }
 
     @Override
-    public Job getJobById(Long id) {
+    public JobWithCompanyDTO getJobById(Long id) {
 //        for(Job job : jobs){
 //            if(job.getId().equals(id))
 //                return job;
 //        }
 //        return null;
-        return jobRepository.findById(id).orElse(null);
+
+        Job job = jobRepository.findById(id).orElse(null);
+        JobWithCompanyDTO jobWithCompanyDTO = new JobWithCompanyDTO();
+
+        if(job != null) {
+            jobWithCompanyDTO.setJob(job);
+            RestTemplate restTemplate = new RestTemplate();
+            CompanyWithReviewsDTO companyWithReviewsDTO = restTemplate.getForObject("http://localhost:8081/companies/" + job.getCompanyId(), CompanyWithReviewsDTO.class);
+            jobWithCompanyDTO.setCompany(companyWithReviewsDTO.getCompany());
+            jobWithCompanyDTO.setReviewList(companyWithReviewsDTO.getReviewList());
+        }
+        return jobWithCompanyDTO;
     }
 
     @Override
