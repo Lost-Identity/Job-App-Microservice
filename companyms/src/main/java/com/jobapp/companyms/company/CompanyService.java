@@ -1,14 +1,13 @@
 package com.jobapp.companyms.company;
 
-import com.jobapp.companyms.company.dto.CompanyWithReviewsDTO;
 
 import java.util.List;
 
 public interface CompanyService {
 
-    List<CompanyWithReviewsDTO> getAllCompanies();
+    List<Company> getAllCompanies();
 
-    CompanyWithReviewsDTO getCompanyById(Long id);
+    Company getCompanyById(Long id);
 
     void createCompany(Company company);
 

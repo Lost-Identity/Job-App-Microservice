@@ -5,11 +5,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-@Entity
+
 public class Review {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String reviewTitle;
@@ -20,8 +18,6 @@ public class Review {
 
     private Long companyId;
 
-    public Review() {
-    }
 
     public Double getReviewRating() {
         return reviewRating;

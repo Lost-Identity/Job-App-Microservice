@@ -1,6 +1,5 @@
 package com.jobapp.companyms.company;
 
-import com.jobapp.companyms.company.dto.CompanyWithReviewsDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +10,7 @@ import java.util.List;
 @RequestMapping("/companies")
 public class CompanyController {
 
-    private CompanyService companyService;
+    private final CompanyService companyService;
 
     public CompanyController(CompanyService service){
         this.companyService = service;
@@ -19,16 +18,16 @@ public class CompanyController {
 
     // get all companies
     @GetMapping(path = "/")
-    public ResponseEntity<List<CompanyWithReviewsDTO>> getAllCompanies(){
-        List<CompanyWithReviewsDTO> companies = companyService.getAllCompanies();
+    public ResponseEntity<List<Company>> getAllCompanies(){
+        List<Company> companies = companyService.getAllCompanies();
         return new ResponseEntity<>(companies, HttpStatus.OK);
     }
 
     // get company by id
     @GetMapping(path = "/{id}")
-    public ResponseEntity<CompanyWithReviewsDTO> getCompanyById(@PathVariable Long id){
+    public ResponseEntity<Company> getCompanyById(@PathVariable Long id){
 
-        CompanyWithReviewsDTO company = companyService.getCompanyById(id);
+        Company company = companyService.getCompanyById(id);
         if(company != null)
             return new ResponseEntity<>(company, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

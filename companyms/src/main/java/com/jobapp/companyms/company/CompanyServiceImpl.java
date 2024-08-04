@@ -1,88 +1,58 @@
 package com.jobapp.companyms.company;
 
-import com.jobapp.companyms.company.dto.CompanyWithReviewsDTO;
-import com.jobapp.companyms.company.external.Review;
-import com.jobapp.companyms.company.external.ReviewList;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class CompanyServiceImpl implements CompanyService{
 
-    private CompanyRepository companyRepository;
+    private final CompanyRepository companyRepository;
+
+    @Autowired
+    RestTemplate restTemplate;
 
     private CompanyServiceImpl(CompanyRepository companyRepo){
         this.companyRepository = companyRepo;
     }
 
     @Override
-    public List<CompanyWithReviewsDTO> getAllCompanies() {
+    public List<Company> getAllCompanies() {
 
-        List<Company> companyList = companyRepository.findAll();
-        List<CompanyWithReviewsDTO> companyWithReviewsDTOList = new ArrayList<>();
-
-        for (Company company : companyList){
-            CompanyWithReviewsDTO companyWithReviewsDTO = new CompanyWithReviewsDTO();
-            companyWithReviewsDTO.setCompany(company);
-
-            RestTemplate restTemplate = new RestTemplate();
-
-            try {
-                ResponseEntity<List<Review>> claimResponse = restTemplate.exchange(
-                        "http://localhost:8083/reviews?companyId=" + company.getId(),
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<List<Review>>() {});
-                if(claimResponse != null && claimResponse.hasBody()){
-                    List<Review> reviewList  = claimResponse.getBody();
-                    companyWithReviewsDTO.setReviewList(reviewList);
-                }
-            } catch (RestClientException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            companyWithReviewsDTOList.add(companyWithReviewsDTO);
-        }
-
-        return companyWithReviewsDTOList;
+        return companyRepository.findAll();
     }
 
+//    private CompanyWithReviewsDTO convertToDto(Company company){
+//
+//        CompanyWithReviewsDTO companyWithReviewsDTO = new CompanyWithReviewsDTO();
+//        companyWithReviewsDTO.setCompany(company);
+////        RestTemplate restTemplate = new RestTemplate();
+//
+//        try {
+//            ResponseEntity<List<Review>> claimResponse = restTemplate.exchange(
+//                    "http://reviewms:8083/reviews?companyId=" + company.getId(),
+//                    HttpMethod.GET,
+//                    null,
+//                    new ParameterizedTypeReference<List<Review>>() {});
+//
+//            if(claimResponse.hasBody()){
+//                List<Review> reviewList  = claimResponse.getBody();
+//                companyWithReviewsDTO.setReviewList(reviewList);
+//            }
+//        } catch (RestClientException e) {
+//            e.printStackTrace();
+//        }
+//        return companyWithReviewsDTO;
+
+//    }
+
     @Override
-    public CompanyWithReviewsDTO getCompanyById(Long id) {
+    public Company getCompanyById(Long id) {
 
-        Company company = companyRepository.findById(id).orElse(null);
-        CompanyWithReviewsDTO companyWithReviewsDTO = new CompanyWithReviewsDTO();
-        companyWithReviewsDTO.setCompany(company);
-
-        RestTemplate restTemplate = new RestTemplate();
-        if(company != null){
-
-            try {
-                ResponseEntity<List<Review>> reviewResponse = restTemplate.exchange(
-                        "http://localhost:8083/reviews?companyId=" + company.getId(),
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<List<Review>>() {
-                        });
-                if (reviewResponse != null && reviewResponse.hasBody()) {
-                    List<Review> reviewList = reviewResponse.getBody();
-                    companyWithReviewsDTO.setReviewList(reviewList);
-                }
-            } catch (RestClientException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        return companyWithReviewsDTO;
+        return companyRepository.findById(id).orElse(null);
     }
 
     @Override
